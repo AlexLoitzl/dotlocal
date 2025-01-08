@@ -1,0 +1,7 @@
+*
+!README.md
+!.gitignore
+!bin
+!bin/swaylock-fancy-rapid
+!bin/swaylock-corruptor
+!bin/screenshot

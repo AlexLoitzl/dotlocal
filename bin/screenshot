@@ -1,0 +1,13 @@
+#!/bin/bash
+MODE=$1
+
+case $MODE in
+# Screenshot of (all) screens
+0) grim - | wl-copy; wl-paste > "$HOME/Pictures/screenshots/$(date +%Y-%m-%d-%T:)$(($(date +%S%N)/1000000%1000))_screenshot.png";;
+# Screenshot of active monitor 
+1) grim -o $(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name') - | wl-copy; wl-paste > "$HOME/Pictures/screenshots/$(date +%Y-%m-%d-%T:)$(($(date +%S%N)/1000000%1000))_screenshot.png";;
+# Screenshot of selected area 
+2) grim -g "$(slurp)" - | wl-copy; wl-paste > "$HOME/Pictures/screenshots/$(date +%Y-%m-%d-%T:)$(($(date +%S%N)/1000000%1000))_screenshot.png";;
+*) echo "Invalid argument"
+esac
+
