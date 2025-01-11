@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Expects to be called by an appropriate udev rule, e.g.,
+# /etc/udev/rules.d/60-battery.rules
+# SUBSYSTEM=="power_supply", ENV{POWER_SUPPLY_TYPE}=="Battery", RUN+="/home/alex/.local/bin/batterynotify"
+
+LEVEL=$(cat /sys/class/power_supply/BAT0/capacity)
+
+# Taken from: https://aeliussaionji.tumblr.com/post/153490337954/libnotify-from-udev
+user_notify() {
+    users=$(who | awk '{print $1}')
+    for user in $users; do
+        # find DBUS session bus
+        pid=$(pgrep -u $user swaync)
+        export DBUS_SESSION_BUS_ADDRESS=$(sed -z -e '/DBUS_SESSION_BUS_ADDRESS/!d' \
+            -e 's/DBUS_SESSION_BUS_ADDRESS=//' /proc/$pid/environ)
+        su -c - $user "$@"
+		echo "Here"
+    done
+}
+
+user_notify "notify-send -a 'System' -t 3000 'Battery Level: $LEVEL%'"
