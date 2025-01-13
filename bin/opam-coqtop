@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# https://mattermost.mpi-sws.org/iris/pl/8w7yujxjwfn9zg7usgj9ctwyhh
+# Based on Michael Sammler's comment 
+set -e
+
+opam exec -- coqtop "$@"
