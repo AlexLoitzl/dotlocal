@@ -1,0 +1,2 @@
+#!/bin/zsh
+firefox -P Reddit "https://www.reddit.com"
