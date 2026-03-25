@@ -6,3 +6,6 @@
 !bin/swaylock-corruptor
 !bin/screenshot
 !bin/batterynotify
+!bin/opam-coqtop
+!bin/reddit
+!bin/whatsapp
