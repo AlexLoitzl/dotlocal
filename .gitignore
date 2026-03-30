@@ -9,3 +9,4 @@
 !bin/opam-coqtop
 !bin/reddit
 !bin/whatsapp
+!bin/filen_sync.sh
