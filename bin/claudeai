@@ -1,0 +1,2 @@
+#!/bin/zsh
+firefox -P Claude "https://claude.ai"
