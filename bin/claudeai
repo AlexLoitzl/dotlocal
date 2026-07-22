@@ -1,2 +1,2 @@
 #!/bin/zsh
-firefox -P Claude "https://claude.ai"
+firefox -P Claude --new-window "https://claude.ai"
