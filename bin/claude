@@ -1,0 +1,77 @@
+#!/usr/bin/zsh
+# USAGE
+# If run without any arguments, the working directory will be ~/git/dimsum which should contain an _opam folder
+# Using -d one can change the working directory, but keep in mind that the rest will be sandboxed, in particular
+# if requiring opam, one can pass -o <PATH_TO_INCLUDING_opam> to mount this opam directory into the working directory
+# Example Usage
+#
+# Run claude in ~/git/dimsum
+# claude
+#
+# Run claude in a different directory which has it's own local opam installation
+# claude -d ~/git/dimsum/worktrees/branch1
+#
+# Run claude in a different directory that uses some other opam switch (Either parent dir or symlink)
+# claude -d ~/git/dimsum/worktrees/branch2 -o ~/git/dimsum/_opam
+export DISABLE_AUTOUPDATER=1
+
+OPAM_BIND=()
+PROJECT_DIR="$HOME/git/dimsum/"
+
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        -d)
+            if [[ -z "$2" ]]; then
+                echo "Error: -d requires an argument" >&2
+                exit 1
+            fi
+            PROJECT_DIR="$2"
+            shift 2
+            ;;
+        -o)
+            if [[ -z "$2" ]]; then
+                echo "Error: -e requires an argument" >&2
+                exit 1
+            fi
+            OPAM_BIND=(--bind "$2" "$PROJECT_DIR/_opam")
+            shift 2
+            ;;
+        *)
+            break  # Stop parsing flags, rest are positional args
+            ;;
+    esac
+done
+
+args=(
+    # Access to binaries etc...
+    --ro-bind /usr /usr
+    --ro-bind /lib /lib
+    --ro-bind /lib64 /lib64
+    --ro-bind /bin /bin
+    # Add Lean
+    --ro-bind $HOME/.elan/ $HOME/.elan/
+    # ro bind libraries - double check if works w/o
+    --ro-bind /etc/ld.so.cache /etc/ld.so.cache
+    --ro-bind /etc/ld.so.conf /etc/ld.so.conf
+    --ro-bind /etc/ld.so.conf.d /etc/ld.so.conf.d
+    # Create directory and move claude code there
+    --dir /opt/claude-code/bin/
+    --ro-bind /usr/bin/obfuscated-claude /opt/claude-code/bin/claude
+    # r/w bind the project repo and .claude dir
+    --bind "$PROJECT_DIR" "$PROJECT_DIR"
+    "${OPAM_BIND[@]}"
+    --bind "$HOME/.claude" "$HOME/.claude"
+    --bind "$HOME/.claude.json" "$HOME/.claude.json"
+    # Network access
+    --ro-bind /etc/ssl /etc/ssl
+    --ro-bind /etc/resolv.conf /etc/resolv.conf
+    --ro-bind /etc/hosts /etc/hosts
+    #
+    --tmpfs /tmp
+    --proc /proc
+    --dev /dev
+    --unshare-pid
+    --die-with-parent
+    --chdir "$PROJECT_DIR"
+)
+bwrap "${args[@]}" "$(command -v obfuscated-claude)" --dangerously-skip-permissions "$@"
